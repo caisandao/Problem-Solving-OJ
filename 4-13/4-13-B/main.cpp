@@ -10,13 +10,15 @@ int y[MAX_M];
 int solve() {
     int res = 0;
     for (int i = 1; i < m+1; i++) {
-        if (y[i] != 0)
+        if (y[i] != 0) {
             res = i;
+            break;
+        }
     }
     for (int i = 0; i < m+1; i++) {
         int tmp = i - res;
         if (tmp >= 0)
-            y[i] = y[tmp];
+            y[i] = y[i] - y[tmp];
     }
     return res;
 }
