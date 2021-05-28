@@ -1,1 +1,1 @@
-hello
+This repository is used to record my solutions to Online Judge problems of problem-solving class.
