@@ -10,13 +10,14 @@ int s,k;
 int l[MAX], r[MAX];
 
 struct node {
-    int id;
-    int size;
-    struct node *left;
-    struct node *right;
-    struct node *parent;
+    int id = -1;
+    int size = 0;
+    struct node *left = nullptr;
+    struct node *right = nullptr;
+    struct node *parent = nullptr;
 }nodes[MAX];
 typedef struct node node;
+node *root;
 
 void calculate_l() {
     stack<pair<int, int>> s; // pair first: id, second: value
@@ -56,8 +57,7 @@ void build_tree() {
     for (int i = 1; i < n; i++) {
         nodes[i].id = i;
         if (l[i] == 0 && r[i] == 0) {
-            nodes[i].parent = nullptr;
-            nodes[i].size = n-1;
+            root = &nodes[i];
         } else {
             if (d[l[i]] < d[r[i]])
                 connect(l[i], i);
@@ -65,18 +65,12 @@ void build_tree() {
                 connect(r[i], i);
         }
     }
-    for (int i = 1; i < n; i++) {
-        if (nodes[i].left == nullptr && nodes[i].right == nullptr) {
-            nodes[i].size = 1;
-            node *c = &nodes[i];
-            node *p = nodes[i].parent;
-            while (p->parent != nullptr) {
-                p->size = c->size + 1;
-                p = p->parent;
-                c = c->parent;
-            }
-        }
-    }
+}
+
+int dfs(node *r) {
+    if (r == nullptr) return 0;
+    int size = dfs(r->left) + dfs(r->right) + 1;
+    return r->size = size;
 }
 
 int find_first_parent(int x ,int k) {
@@ -117,6 +111,7 @@ int main() {
     calculate_l();
     calculate_r();
     build_tree();
+    dfs(root);
 
     while (q--) {
         scanf("%d%d", &s, &k);
