@@ -1,57 +1,45 @@
 #include <iostream>
-#include <algorithm>
-#include <cstring>
-#define ll long long
-#define MAX_N 55
-#define MAX_M 10004
+#include <vector>
+#include <queue>
+#define MAX_N 100005
+#define MAX_K 12
 using namespace std;
 
-int t;
-int n;
-int x[MAX_N];
-ll y[MAX_M];
-ll yy[MAX_M];
-int sum_x;
+int n,m,k;
+int cost[MAX_N][MAX_K];
+int vis[MAX_N];
+vector<pair<int, int>> edges[MAX_N]; // first: destination, second: weight
 
-
-void solve() {
-    y[0] = 1;
-    for (int i = 0; i < n; i++) {
-        for (int j = 1; j <= sum_x; j++) {
-            int tmp = j - x[i];
-            if (tmp >= 0)
-                yy[j] = y[j] + y[tmp];
-        }
-        for (int j = 1; j <= sum_x; j++) {
-            y[j] = yy[j];
+void dijkstra() {
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+    cost[1][0] = 0;
+    pq.emplace(0, 1);
+    while (!pq.empty()) {
+        const auto state = pq.top();
+        pq.pop();
+        const int cur_cost = state.first;
+        const int cur_idx = state.second;
+        if (vis[cur_idx]) continue;
+        vis[cur_idx] = 1;
+        for (const auto & edge : edges[cur_idx]) {
+            const int new_cost = cur_cost + edge.second;
+            const int new_idx = edge.first;
+            if (new_cost < cost[new_idx]) {
+                pq.push({new_cost, new_idx});
+                cost[new_idx][0] = new_cost;
+            }
         }
     }
-}
-
-void init() {
-    memset(x, 0, sizeof(x));
-    memset(y, 0, sizeof(y));
-    memset(yy, 0, sizeof(yy));
-    sum_x = 0;
 }
 
 int main() {
-    scanf("%d", &t);
-    while (t--) {
-        init();
-        scanf("%d", &n);
-        for (int i = 0; i < n; i++)
-            scanf("%d", &x[i]);
-        sort(x, x+n);
-        for (int i = 0; i < n; i++)
-            sum_x += x[i];
-        solve();
-        for (int i = 0; i <= sum_x; i++) {
-            printf("%lld", y[i]);
-            if (i == sum_x)
-                printf("\n");
-            else
-                printf(" ");
-        }
+    scanf("%d%d%d", &n, &m, &k);
+    int u,v,d;
+    for (int i = 0; i < m; i++) {
+        scanf("%d%d%d", &u, &v, &d);
+        edges[u].emplace_back(v, d);
+        edges[v].emplace_back(u, d);
     }
+    
+
 }
