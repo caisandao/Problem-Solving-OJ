@@ -1,44 +1,63 @@
 #include <iostream>
-#include <cstring>
-#include <set>
 #include <vector>
-#include <unordered_map>
+#include <map>
+#include <queue>
 #include <algorithm>
-#define MAX_L 1006
-#define MAX_R 5003
+#include <cstring>
+#include <unordered_set>
+#define MAX 50005
+#define MAX_NUM 1000006
 using namespace std;
 
+map<int, bool> dices[MAX];
+vector<int> d;
 int n;
-//int Map[MAX_L][MAX_R];
-unordered_map<int, int> dices[MAX_R];
-int cl[MAX_L], cr[MAX_R];
-bool vis[MAX_L];
-int L, R;
-set<int> num;
+int d_end;
+int cx[MAX_NUM], cy[MAX];
+unordered_set<int> vis2;
 
-bool dfs(int u) { // 从右边进入
-    for (auto iter = num.begin(); iter != num.end(); iter++) {
-        if (dices[u][*iter] && !vis[*iter] && *iter >= L && *iter <= R) {
-            vis[*iter] = 1;
-            if (cl[*iter] == -1 || dfs(cl[*iter])) {
-                cr[u] = *iter;
-                cl[*iter] = u;
-                return 1;
+bool dfs(int l, int r, int u) {
+    for (int v = l; v < r; v++) {
+        if (dices[u][d[v]] && vis2.find(d[v]) == vis2.end()) {
+            vis2.insert(d[v]);
+            if (cx[d[v]] == -1 || dfs(l, r, cx[d[v]])) {
+                cy[u] = d[v];
+                cx[d[v]] = u;
+                return true;
             }
         }
     }
-    return 0;
+    return false;
 }
 
-int maxmatch() {
+int maxmatch(int l, int r) {
     int ans = 0;
-    memset(cl, -1, sizeof(cl));
-    memset(cr, -1, sizeof(cr));
+    memset(cx, -1, sizeof(cx));
+    memset(cy, -1, sizeof(cy));
     for (int i = 0; i < n; i++) {
-        if (cr[i] == -1) {
-            memset(vis, 0, sizeof(vis));
-            ans += dfs(i);
+        if (cy[i] == -1) {
+            vis2.clear();
+            ans += dfs(l, r,i);
         }
+    }
+    return ans;
+}
+
+int solve() {
+    int l = 0, r = 1, ans = 1;
+    while (r < d_end) {
+        if (d[r] == d[r-1] + 1)
+            r += 1;
+        else {
+            l = r;
+            r += 1;
+        }
+        if (r - l < ans) continue;
+        int tmp = maxmatch(l ,r);
+        if (tmp == r - l)
+            ans = max(ans, r-l);
+        else
+            l += 1;
     }
     return ans;
 }
@@ -48,34 +67,15 @@ int main() {
     int x[6];
     for (int i = 0; i < n; i++) {
         scanf("%d%d%d%d%d%d", &x[0], &x[1], &x[2], &x[3], &x[4], &x[5]);
-        for (int j = 0; j < 6; j++) {
-            num.insert(x[j]);
-            dices[i][x[j]] = 1;
+        for (int & j : x) {
+            dices[i][j] = true;
+            d.emplace_back(j);
         }
     }
-    //sort(num.begin(), num.end());
-    L = *num.begin();
-    R = *num.begin();
-    int ans = 0;
-    auto iter = num.begin();
-    iter++;
-    auto iter2 = iter;
-    iter--;
-    while (iter2 != num.end()) {
-        while (iter2 != num.end() && *iter2 == *iter + 1) {
-            iter++;
-            iter2++;
-        }
-        R = *iter;
-        int tmp = maxmatch();
-        if (tmp > ans) ans = tmp;
-        if (iter2 != num.end()) {
-            L = *iter2;
-            R = *iter2;
-            iter = iter2;
-            iter2++;
-        } else break;
-    }
+    sort(d.begin(), d.end());
+    auto tmp = unique(d.begin(), d.end());
+    d_end = tmp - d.begin();
+    int ans = solve();
     printf("%d\n", ans);
     return 0;
 }
